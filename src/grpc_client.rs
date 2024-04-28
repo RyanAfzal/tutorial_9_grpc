@@ -8,11 +8,10 @@ pub mod services {
     tonic::include_proto!("services");
 }
 
-use services::{
-    chat_service_client::ChatServiceClient, payment_service_client::PaymentServiceClient,
-    transaction_service_client::TransactionServiceClient, ChatMessage, PaymentRequest,
-    TransactionRequest,
-};
+use services::{payment_service_client::PaymentServiceClient, PaymentRequest,
+    transaction_service_client::TransactionServiceClient, TransactionRequest,
+    chat_service_client::ChatServiceClient, ChatMessage};
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -37,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .into_inner();
     while let Some(transaction) = stream.message().await? {
-        print!("Transaction: {:?}", transaction);
+        println!("Transaction: {:?}", transaction);
     }
 
     let channel = Channel::from_static("http://[::1]:50051").connect().await?;
@@ -48,6 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::spawn(async move {
         let stdin = io::stdin();
         let mut reader = io::BufReader::new(stdin).lines();
+
         while let Ok(Some(line)) = reader.next_line().await {
             if line.trim().is_empty() {
                 continue;
@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             };
 
             if tx.send(message).await.is_err() {
-                eprint!("Failed to send message to server");
+                eprintln!("Failed to send message to server");
                 break;
             }
         }
@@ -68,7 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut response_stream = client.chat(request).await?.into_inner();
 
     while let Some(response) = response_stream.message().await? {
-        println!("Server saves: {:?}", response)
+        println!("Server says: {:?}", response)
     }
 
     Ok(())

@@ -7,12 +7,10 @@ pub mod services {
     tonic::include_proto!("services");
 }
 
-use services::{
-    chat_service_server::{ChatService, ChatServiceServer},
-    payment_service_server::{PaymentService, PaymentServiceServer}, 
-    transaction_service_server::{TransactionService, TransactionServiceServer},
-    ChatMessage, PaymentRequest, PaymentResponse, TransactionRequest, TransactionResponse,
-};
+use services::{payment_service_server::{PaymentService,PaymentServiceServer}, PaymentRequest, PaymentResponse, 
+    transaction_service_server::{TransactionService, TransactionServiceServer}, TransactionRequest, TransactionResponse,
+    chat_service_server::{ChatService, ChatServiceServer}, ChatMessage};
+
 
 #[derive(Default)]
 pub struct MyPaymentService {}
@@ -40,7 +38,7 @@ impl TransactionService for MyTransactionService {
     async fn get_transaction_history(
         &self,
         request: Request<TransactionRequest>,
-    ) -> Result<Response<self::GetTransactionHistoryStream>, Status> {
+    ) -> Result<Response<Self::GetTransactionHistoryStream>, Status> {
         println!("Received Transaction Request: {:?}", request);
         let (tx, rx): (Sender<Result<TransactionResponse, Status>>, Receiver<Result<TransactionResponse, Status>>) = mpsc::channel(4);
 
